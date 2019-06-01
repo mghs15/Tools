@@ -94,6 +94,7 @@ window.addEventListener("DOMContentLoaded", function(){
                 var src = srcData.data;
 
                 var html = creatColorTable(src, width, height);
+                html =  "<p>対象ファイル： " + file[0].name +  "</p>" + html;
 
                 //テーブル表示
                 document.getElementById("output").innerHTML = html;
