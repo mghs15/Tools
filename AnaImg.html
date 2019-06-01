@@ -25,7 +25,7 @@ function rgb2hex(r,g,b) {
     b = b.toString(16);
     if(b.length == 1){ b = "0" + b;}
  
-    return '#' + r + g + b;  
+    return '#' + r.toUpperCase() + g.toUpperCase() + b.toUpperCase();  
 }  
 
 var html_text ='<p>以下、出力結果↓</p>';
@@ -44,8 +44,12 @@ for (var i = 0; i < height; i++) {
         var a = src[idx+3]; //透明度（今回利用しない）
         
         var hex = rgb2hex(r,g,b);
-        html_text = html_text + '<td style=\"background-color:' + hex + ';\">' + hex + '</td>' + "\n";
-//        console.log( '<td style=\"background-color=' + hex + ';\">' + hex + '</td>');
+        
+        var charCol = "#000000"; //黒
+        if(r < 150 && g < 150 && b < 150){charCol = "#FFFFFF";}//白
+        
+        html_text = html_text + '<td style=\"background-color:' + hex + '; color:' + charCol + ';\">' + hex + '</td>' + "\n";
+        
         if(i == 0){ header = header + '<td>' + j + '</td>' + "\n";}
     }
     html_text = html_text + "</tr>" + "\n";
@@ -59,7 +63,6 @@ html_text = '<table>' + header + html_text + '</table><p>以上、出力結果�
 window.addEventListener("DOMContentLoaded", function(){
     //ファイルオープンの際のイベント
     var oImage = document.getElementById("image");
-    console.log(oImage);
     oImage.addEventListener("change", function(evt) {
         var canvas = document.createElement("canvas");
  
