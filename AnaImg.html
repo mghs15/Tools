@@ -28,12 +28,11 @@ function rgb2hex(r,g,b) {
     return '#' + r.toUpperCase() + g.toUpperCase() + b.toUpperCase();  
 }  
 
-var html_text ='<p>以下、出力結果↓</p>';
 
 //imageのRGBからHEXへ変換し、HTML作成
 var creatColorTable = function(src, width, height) {
 var header = '<tr align="right"><td></td>';
-// html_text = html_text + ;
+var html_text ='<p>以下、出力結果↓</p>';
 for (var i = 0; i < height; i++) {
     html_text = html_text + "<tr><td>" + i + "</td>" + "\n";
     for (var j = 0; j < width; j++) {
@@ -56,6 +55,7 @@ for (var i = 0; i < height; i++) {
 }
 header = header + '</tr>' + "\n";
 html_text = '<table>' + header + html_text + '</table><p>以上、出力結果です。</p>';
+return html_text;
 };
   
 
@@ -93,10 +93,10 @@ window.addEventListener("DOMContentLoaded", function(){
 
                 var src = srcData.data;
 
-                creatColorTable(src, width, height);
+                var html = creatColorTable(src, width, height);
 
                 //テーブル表示
-                document.getElementById("output").innerHTML = html_text;
+                document.getElementById("output").innerHTML = html;
             }
             console.log(img); 
         }
