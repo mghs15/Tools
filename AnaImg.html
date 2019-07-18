@@ -40,15 +40,16 @@ for (var i = 0; i < height; i++) {
         var r = src[idx]; //赤
         var g = src[idx+1]; //緑
         var b = src[idx+2]; //青
-        var a = src[idx+3]; //透明度（今回利用しない）
+        var a = src[idx+3]; //透明度
         
         var hex = rgb2hex(r,g,b);
         
         if(a){
+          a = Math.round(a * 16 * 16);
           a = a.toString(16);
           if(a.length == 1){ a = "0" + a;}
         }else{
-          a = ""
+          var a = ""
         }    
      
         var charCol = "#000000"; //黒
