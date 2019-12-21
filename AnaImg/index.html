@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+<p>画像のピクセルごとの色情報をカラーコード（#000000など）の形で出力します。当然ですが、画像が大きいと重くなりますので、なるべくトリミングして必要な部分だけでお試しください。</p>
+<p style="padding: 5px; border: 1px solid">参考文献　<a target='_blank' href='https://mementoo.info/archives/1617'>https://mementoo.info/archives/1617</a>
+<br>（<a target='_blank' href='https://mementoo.info/archives/about#i'>ライセンス</a>はMIT相当だそうです。）</p>
+<input type="file" id="image" accept='image/*'>
+<div id="output">
+</div>
+
+<script>
+// rgbをhex形式へ変換する
+function rgb2hex(r,g,b) {
+ 
+    r = r.toString(16);
+    if(r.length == 1){ r = "0" + r;}
+ 
+    g = g.toString(16);
+    if(g.length == 1){ g = "0" + g;}
+ 
+    b = b.toString(16);
+    if(b.length == 1){ b = "0" + b;}
+    return '#' + r.toUpperCase() + g.toUpperCase() + b.toUpperCase();  
+}  
+//imageのRGBからHEXへ変換し、HTML作成
+var creatColorTable = function(src, width, height) {
+var header = '<tr align="right"><td></td>';
+var html_text ='<p>以下、出力結果↓</p>';
+for (var i = 0; i < height; i++) {
+    html_text = html_text + "<tr><td>" + i + "</td>" + "\n";
+    for (var j = 0; j < width; j++) {
+        var idx = (j + i * width) * 4;
+        var r = src[idx]; //赤
+        var g = src[idx+1]; //緑
+        var b = src[idx+2]; //青
+        var a = src[idx+3]; //透明度
+        
+        var hex = rgb2hex(r,g,b);
+     
+//        console.log(a);
+        if(a){
+          a = a.toString(16);
+          if(a.length == 1){ a = "0" + a;}
+        }else{
+          var a = "";
+        }
+     
+        var charCol = "#000000"; //黒
+        if(r < 150 && g < 150 && b < 150){charCol = "#FFFFFF";}//白
+        
+        html_text = html_text + '<td style=\"background-color:' + hex + a + '; color:' + charCol + ';\"' 
+         + ' title=\"' + i + '-' + j + '\">' + hex + '</td>' + "\n";
+        
+        if(i == 0){ header = header + '<td>' + j + '</td>' + "\n";}
+    }
+    html_text = html_text + "</tr>" + "\n";
+}
+header = header + '</tr>' + "\n";
+html_text = '<table>' + header + html_text + '</table><p>以上、出力結果です。</p>';
+return html_text;
+};
+  
+ 
+window.addEventListener("DOMContentLoaded", function(){
+    //ファイルオープンの際のイベント
+    var oImage = document.getElementById("image");
+    oImage.addEventListener("change", function(evt) {
+        var canvas = document.createElement("canvas");
+ 
+        var file = evt.target.files;
+        var reader = new FileReader();
+ 
+        //dataURL形式でファイルを読み込む
+        reader.readAsDataURL(file[0]);
+        
+ 
+        //ファイルの読込が終了した時の処理
+        reader.onload = function(){
+            var img = new Image();
+            img.src = reader.result; 
+            img.onload = function(){
+                //キャンバスに画像をセット
+                var context = canvas.getContext('2d');
+                var width = img.width;
+                var height = img.height;
+                canvas.width = width;
+                canvas.height = height;
+                context.drawImage(img, 0, 0);
+                //処理
+                var srcData = context.getImageData(0, 0, width, height);
+                
+                console.log(srcData);
+                var src = srcData.data;
+                var html = creatColorTable(src, width, height);
+                html =  "<p>対象ファイル： " + file[0].name +  "</p>" + html;
+                //テーブル表示
+                document.getElementById("output").innerHTML = html;
+            }
+            console.log(img); 
+        }
+    }, false);
+});
+</script>
+</body>
+</html> 
