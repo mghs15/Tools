@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0, ,user-scalable=no" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-  <title>CSV形式の経緯度と特定地点の距離を計算</title>
+  <title>経緯度リストの各点と特定地点の距離を計算</title>
   
   <noscript>
     <div class="noscript">
@@ -18,10 +18,13 @@
 </head>
 
 <body>
-  <h1>CSV形式の経緯度と特定地点の距離を計算</h1>
+  <h1>経緯度リストの各点と特定地点の距離を計算</h1>
   
   <h2>概要</h2>
-  <div>CSV（名前,緯度,経度）と特定の地点の距離（大圏航路）を計算。小数点は処理せずにかなりの桁数表示しているが、そこまでの精度はないはずなので注意（参考文献を参照）。</div>
+  <div>
+  ある特定の地点と、CSV（名前,緯度,経度）に記載された各点との距離（大圏航路）を計算。<br>
+  小数点は処理せずにかなりの桁数表示しているが、そこまでの精度はないはずなので注意（参考文献を参照）。
+  </div>
   
   <h2>設定</h2>
   <div>
@@ -30,6 +33,12 @@
          </li>
          <li><span style="color:#0000ff;">config.js</span>　特定の地点の経緯度を設定
          </li>
+         <!--
+         <li>測量計算サイトのREST APIのURLを併記しますか？<br>
+            <label><input type='radio' name='q1' value=1 checked>併記する</label>
+            <label><input type='radio' name='q1' value=0>併記しない</label>
+         </li>
+         -->
      </ul>
   </div>
   
@@ -43,14 +52,16 @@
   
   
   <h2>結果</h2>
-  <span style="color:#0000ff;">name, 緯度, 経度, 距離(km), 距離計測サイトのAPIのURL</span>
+  <div id='results_header' style="color:#0000ff;"></div>
   <div id='results'>テスト</div>
   
   <h2>参考文献</h2>
   <div>
+     <p>地理院地図のソースを主計算に用い、測量計算サイトで結果の確認を行った。</p>
      <ul>
          <li>地理院地図のソース　https://github.com/gsi-cyberjapan/gsimaps</li>
          <li>測量計算サイト　REST APIの機能（距離と方位角の計算）　https://vldb.gsi.go.jp/sokuchi/surveycalc/api_help.html</li>
+         <li>サンプルのCSVは地理院地図の地名検索機能（東大CSISの結果を含む）を利用して作成</li>
      </ul>
   </div>
   
@@ -537,15 +548,19 @@
     function roadPoints(fileName){
         var xhr = new XMLHttpRequest();
         xhr.addEventListener('load', function(evt){
+            //CSVの中身を１行ごとに処理するため、改行で分割
             pointsContent = (evt.target.response || evt.target.responseText).split("\n");
             var n = pointsContent.length;
             for(var i = 0; i < n; i++ ){
+                //CSVの中身を１行ごとに処理
                 var pointsContents = pointsContent[i].split(",");
-                if(pointsContents.length > 1){
+                //CSVでのカラムが３以上の行のみ処理を行う
+                if(pointsContents.length > 2){
                      toPoints.name.push(pointsContents[0]);
                      toPoints.lat.push(pointsContents[1]);
                      toPoints.lng.push(pointsContents[2]);
 
+                     //距離計算さん
                      var distance = GSI.Utils.DistanceCalculator.calc(
                        {
                          "lat" : fromLat, 
@@ -557,17 +572,29 @@
                        }
                      );
                      
+                     //測量計算サイトのAPI
                      var api_url = "https://vldb.gsi.go.jp/sokuchi/surveycalc/surveycalc/bl2st_calc.pl?" + "outputType=json&ellipsoid=GRS80"
                                    + "&latitude1=" + fromLat
                                    + "&longitude1=" + fromLng
                                    + "&latitude2=" + pointsContents[1].toString(10)
                                    + "&longitude2=" + pointsContents[2].toString(10);
+                     var api_str = ", " + "\"" + api_url + "\"";
                      
+                     //結果のヘッダ
+                     document.getElementById('results_header').innerHTML = "name, 緯度, 経度, 距離(km), 距離計測サイトのAPIのURL";
+                     
+                     //クエリがあれば、APIのURLを併記しない。
+                     if(window.location.search){
+                         api_str = "";
+                         document.getElementById('results_header').innerHTML = "name, 緯度, 経度, 距離(km)";
+                     }
+                     
+                     //結果の出力
                      var distance_km = distance/1000; //単位をkmにする
                      distanceHTML = distanceHTML+ pointsContents[0] + ", "
                                     + pointsContents[1].toString(10) + ", "
                                     + pointsContents[2].toString(10) + ", "
-                                    + distance_km + ", " + "\"" + api_url + "\"" + "\n<br>" ;
+                                    + distance_km + api_str + "\n<br>" ;
 //                     console.log(distanceHTML);
                      document.getElementById('results').innerHTML = distanceHTML;
 
