@@ -523,6 +523,8 @@
     
     */
     
+    console.log(fromLat + ", " + fromLng);
+    
     var distanceHTML = ""; 
     
     var toPoints = new Array();
@@ -561,12 +563,12 @@
                                    + "&latitude2=" + pointsContents[1].toString(10)
                                    + "&longitude2=" + pointsContents[2].toString(10);
                      
-                     var distance_km = distance/100; //単位をkmにする
+                     var distance_km = distance/1000; //単位をkmにする
                      distanceHTML = distanceHTML+ pointsContents[0] + ", "
                                     + pointsContents[1].toString(10) + ", "
                                     + pointsContents[2].toString(10) + ", "
                                     + distance_km + ", " + "\"" + api_url + "\"" + "\n<br>" ;
-                     console.log(distanceHTML);
+//                     console.log(distanceHTML);
                      document.getElementById('results').innerHTML = distanceHTML;
 
                 }
