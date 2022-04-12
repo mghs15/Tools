@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>Check WebGL</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script>
+
+window.onload = () => {
+  let res = "";
+  
+  const canvas = document.createElement('canvas');
+  if(canvas) res += "canvas created ..." + "<br>";
+  
+  res += 'canvas.getContext("webgl") : ' + canvas.getContext("webgl") + "<br>";
+  res += 'canvas.getContext("experimental-webgl") : ' + canvas.getContext("experimental-webgl") + "<br>";
+  
+  const webGLContext = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+  
+  res += 'window.WebGLRenderingContext : ' + window.WebGLRenderingContext + "<br>"; 
+  res += 'webGLContext.getShaderPrecisionFormat : ' + webGLContext.getShaderPrecisionFormat + "<br>";
+
+  const parent = document.getElementById('wrap');
+  parent.innerHTML = res;
+}
+
+
+</script>
+
+<style>
+body{
+  background-color: #EEFFEE;
+}
+
+
+
+</style>
+
+</head>
+<body>
+
+<div id="page">
+  <div id="wrap">
+  </div>
+</div>
+
+<script>
+  
+</script>
+
+</body>
+</html>
+
+
