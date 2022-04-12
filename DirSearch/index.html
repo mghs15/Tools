@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>検索</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script>
+
+const globalInfo = {
+  "text": "",
+  "list": [],
+  "index": {}
+}
+
+
+
+const addCard = () => {
+  console.log("add");
+  const selectedFile = document.getElementById('addCard').files[0];
+  console.log(selectedFile);
+  
+  const reader = new FileReader();
+  reader.onload = () => {
+    
+    globalInfo.text = reader.result;
+    globalInfo.list = globalInfo.text.split(/(\r\n|\n)/g);
+    
+    const parent = document.getElementById('wrap');
+    parent.innerHTML = "読み込み完了！（" + globalInfo.list.length + "件）";
+    
+    //メモリを食うっぽいので、最初は表示しない
+    //renderFromList(globalInfo.list);
+    
+  }
+  
+  reader.readAsText(selectedFile, 'shift-jis');
+}
+
+
+const renderFromList = (list) => {
+  
+  let res = "";
+  
+  if(list.length < 1) res += "結果はありません。";
+  
+  if(list.length > 1000){
+    const answer = window.confirm("結果は" + list.length + "件です。すべて表示しますか？");
+    if(!answer){
+      res += "一部（1000件）のみ表示します。";
+      list.splice(1000);
+    }
+  }else{
+    res += "結果は" + list.length + "件です。";
+  }
+  
+  let prev = [""];
+  
+  for(i in list){
+    const f = list[i];
+    
+    const pass = f.split("\\");
+    const n = pass.length;
+    
+    //0番目
+    let d = pass[0] + "/";
+    let de = pass[0] + "/";
+    
+    let dupCount = 0;
+    let count = 0;
+    
+    //1～n-2番目
+    for(let i=1; i<n-1; i++){
+      d += pass[i] + "/";
+      count += 1;
+      
+      if(prev[i] && prev[i] == pass[i]){
+        de += "<span class='passComp dupComp'><a target='_file' href='file:///" + d + "'>" + pass[i] + "</a></span>" + "/";
+        //de = repTab(i) + "└";
+        dupCount += 1;
+      }else{
+        prev = [];
+        de += "<span class='passComp'><a target='_file' href='file:///" + d + "'>" + pass[i] + "</a></span>" + "/";
+      }
+      
+    }
+    
+    if(dupCount < count){
+      de = "<p class='folder'>" + de + "</p>";
+    }else{
+      de = "";
+    }
+    
+    //最後
+    prev = pass;
+    
+    d += pass[n-1];
+    de += "<p>" + "　　　　　└<span class='passComp'><a target='_file' href='file:///" + d + "'>" + pass[n-1] + "</a></span></p>";
+    
+    const e = de;
+    res += e;
+  }
+  
+  const parent = document.getElementById('wrap');
+  parent.innerHTML = res;
+
+}
+
+const repTab = (num) => {
+  const char = "　　";
+  return char.repeat(num);
+}
+
+const searchFiles = () => {
+  const word = document.getElementById("searchWord").value;
+  const words = word.split(/(\s|　)/g);
+  
+  const result = globalInfo.list.filter(f => f.match(word));
+  renderFromList(result);
+}
+
+</script>
+
+<style>
+body{
+  background-color: #EEFFEE;
+}
+
+#info div {
+  display: inline-block;
+}
+
+.passComp {
+  margin-left: 4px;
+  margin-right: 4px;
+  margin-top:4px;
+  border-radius: 4px;
+  background-color: #CCFFDD;
+}
+
+.dupComp {
+  background-color: #DDDDDD;
+}
+
+#memo {
+  background-color: #000000;
+  color: #FFFFFF;
+  border-radius: 4px;
+  margin: 8px;
+  padding: 4px;
+}
+
+#info {
+  margin: 8px;
+  padding: 4px;
+}
+
+#wrap {
+  margin: 8px;
+  padding: 4px;
+}
+
+.blank{
+  opacity: 0;
+}
+
+.folder{
+  border-left: 4px solid #005500;
+  margin: 4px;
+  padding: 4px;
+}
+
+
+</style>
+
+</head>
+<body>
+
+<div id="overlayLargeImageSpace"></div>
+<div id="overlayLock"></div>
+<div id="page">
+  <div id="memo">
+  dir \C /s /b /a-d > testsamp.txt
+  </div>
+  <div id="info">
+    <div id="searchInputArea"><input type="text" id="searchWord"></div>
+    <div id="infoSearchButton"><button id="searchButton" onClick="searchFiles();">絞り込み</button></div>
+    <div id="infoAddCardButton"><input type="file" id="addCard" onChange="addCard();"></div>
+  </div>
+  <div id="wrap">
+  </div>
+</div>
+
+<script>
+  
+</script>
+
+</body>
+</html>
+
+
