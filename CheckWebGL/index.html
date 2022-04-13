@@ -7,6 +7,9 @@
 <script>
 
 window.onload = () => {
+ 
+  canUseWebGL();  
+  
   let res = "";
   
   const canvas = document.createElement('canvas');
@@ -23,7 +26,6 @@ window.onload = () => {
   const parent = document.getElementById('wrap');
   parent.innerHTML += res;
   
-  canUseWebGL();  
   
 }
 
