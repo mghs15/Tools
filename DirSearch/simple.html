@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>検索</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script>
+
+const globalInfo = {
+  "text": "",
+  "list": [],
+  "index": {}
+}
+
+
+
+const addCard = () => {
+  console.log("add");
+  const selectedFile = document.getElementById('addCard').files[0];
+  console.log(selectedFile);
+  
+  const reader = new FileReader();
+  reader.onload = () => {
+    
+    globalInfo.text = reader.result;
+    globalInfo.list = globalInfo.text.split(/(\r\n|\n)/g);
+    
+    const parent = document.getElementById('wrap');
+    parent.innerHTML = "読み込み完了！（" + globalInfo.list.length + "件）";
+    
+    //メモリを食うっぽいので、最初は表示しない
+    //renderFromList(globalInfo.list);
+    
+  }
+  
+  reader.readAsText(selectedFile, 'shift-jis');
+}
+
+
+const renderFromList = (list) => {
+  
+  let res = "";
+  
+  if(list.length < 1) res += "結果はありません。";
+  
+  if(list.length > 1000){
+    const answer = window.confirm("結果は" + list.length + "件です。すべて表示しますか？");
+    if(!answer){
+      res += "一部（1000件）のみ表示します。";
+      list.splice(1000);
+    }else{
+      res += "結果は" + list.length + "件です。";
+    }
+  }else{
+    res += "結果は" + list.length + "件です。";
+  }
+  
+  
+  res += "<div class='tableOutline'>";
+  for(i in list){
+    const f = list[i];
+    let de = "";
+    
+    //もし、ラインをさらにセルに分けて表示したければ、
+    const pass = f.split("\\");
+    const n = pass.length;
+    
+    for(let i=0; i<n; i++){
+      const cell = pass[i];
+      de += "<div class='tableCell'>" + cell + "</div>";
+    }
+    
+    //ラインのHTML生成
+    res += "<div class='tableRow'>" + de + "</div>";
+  }
+  res += "</div>";
+  
+  const parent = document.getElementById('wrap');
+  parent.innerHTML = res;
+
+}
+
+const searchFiles = () => {
+  const word = document.getElementById("searchWord").value;
+  const words = word.split(/(\s|　)/g);
+  
+  let result = globalInfo.list;
+  
+  words.forEach( w => {
+    result = result.filter(f => f.match(w));
+  });
+  
+  renderFromList(result);
+}
+
+</script>
+
+<style>
+body{
+  background-color: #EEFFEE;
+}
+
+#info div {
+  display: inline-block;
+}
+
+.passComp {
+  margin-left: 4px;
+  margin-right: 4px;
+  margin-top:4px;
+  border-radius: 4px;
+  background-color: #CCFFDD;
+}
+
+.dupComp {
+  background-color: #DDDDDD;
+}
+
+#memo {
+  background-color: #000000;
+  color: #FFFFFF;
+  border-radius: 4px;
+  margin: 8px;
+  padding: 4px;
+}
+
+#info {
+  margin: 8px;
+  padding: 4px;
+}
+
+#wrap {
+  margin: 8px;
+  padding: 4px;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 50px);
+  
+  /*
+  grid-template-columns: 30px 50px 50px 80px 150px 1fr;
+  */
+}
+
+.tableRow:hover .tableCell {
+  background-color: #5DA797;
+  color: #FFFFFF;
+}
+
+.tableCell {
+  display: inline-block;
+  border: solid 1px #888888;
+  padding: 4px;
+}
+
+</style>
+
+</head>
+<body>
+
+<div id="overlayLargeImageSpace"></div>
+<div id="overlayLock"></div>
+<div id="page">
+  <div id="memo">
+  メモ
+  </div>
+  <div id="info">
+    <div id="searchInputArea"><input type="text" id="searchWord"></div>
+    <div id="infoSearchButton"><button id="searchButton" onClick="searchFiles();">絞り込み</button></div>
+    <div id="infoAddCardButton"><input type="file" id="addCard" onChange="addCard();"></div>
+  </div>
+  <div id="wrap">
+  </div>
+</div>
+
+<script>
+  
+</script>
+
+</body>
+</html>
+
+
