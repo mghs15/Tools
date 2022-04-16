@@ -48,6 +48,8 @@ const renderFromList = (list) => {
     if(!answer){
       res += "一部（1000件）のみ表示します。";
       list.splice(1000);
+    }else{
+      res += "結果は" + list.length + "件です。";
     }
   }else{
     res += "結果は" + list.length + "件です。";
