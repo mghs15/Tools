@@ -11,6 +11,8 @@ CSV形式の経緯度リストと特定地点の距離（大圏航路）を計�
 ## [DirSearch](https://mghs15.github.io/Tools/DirSearch/)
 コマンドプロンプトの`dir`コマンドで吐き出したファイルを検索して、いい感じに表示したかったツール
 
+[シンプル版](https://mghs15.github.io/Tools/DirSearch/simple.html)
+
 ## [CheckWebGL](https://mghs15.github.io/Tools/CheckWebGL)
 WebGLの判定用ツール。不十分かも。
 
