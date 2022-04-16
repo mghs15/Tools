@@ -22,8 +22,8 @@ const addCard = () => {
   const reader = new FileReader();
   reader.onload = () => {
     
-    globalInfo.text = reader.result;
-    globalInfo.list = globalInfo.text.split(/(\r\n|\n)/g);
+    globalInfo.text = reader.result.replace(/\r/g);
+    globalInfo.list = globalInfo.text.split(/\n/g);
     
     const parent = document.getElementById('wrap');
     parent.innerHTML = "読み込み完了！（" + globalInfo.list.length + "件）";
@@ -59,6 +59,9 @@ const renderFromList = (list) => {
   res += "<div class='tableOutline'>";
   for(i in list){
     const f = list[i];
+    
+    if(!f) continue;
+    
     let de = "";
     
     //もし、ラインをさらにセルに分けて表示したければ、
@@ -136,7 +139,7 @@ body{
 
 .tableRow {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 50px);
+  grid-template-columns: repeat(auto-fill, 150px);
   
   /*
   grid-template-columns: 30px 50px 50px 80px 150px 1fr;
@@ -152,6 +155,7 @@ body{
   display: inline-block;
   border: solid 1px #888888;
   padding: 4px;
+  overflow-wrap: break-word;
 }
 
 </style>
