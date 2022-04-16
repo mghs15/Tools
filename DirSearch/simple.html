@@ -22,7 +22,8 @@ const addCard = () => {
   const reader = new FileReader();
   reader.onload = () => {
     
-    globalInfo.text = reader.result.replace(/\r/g);
+    globalInfo.text = reader.result;
+    globalInfo.text = globalInfo.text.replace(/\r/g, "");
     globalInfo.list = globalInfo.text.split(/\n/g);
     
     const parent = document.getElementById('wrap');
@@ -65,7 +66,8 @@ const renderFromList = (list) => {
     let de = "";
     
     //もし、ラインをさらにセルに分けて表示したければ、
-    const pass = f.split("\\");
+    const pass = f.split(",");
+    console.log(f, pass)
     const n = pass.length;
     
     for(let i=0; i<n; i++){
@@ -90,7 +92,9 @@ const searchFiles = () => {
   let result = globalInfo.list;
   
   words.forEach( w => {
+    if( w.match(/\s/) || w == "　" ) return;
     result = result.filter(f => f.match(w));
+    console.log(w, result.length);
   });
   
   renderFromList(result);
@@ -139,11 +143,10 @@ body{
 
 .tableRow {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 150px);
-  
   /*
-  grid-template-columns: 30px 50px 50px 80px 150px 1fr;
+  grid-template-columns: repeat(auto-fill, 150px);
   */
+  grid-template-columns: 80px 100px 50px 150px 150px repeat(9, 30px) 150px 150px 1fr;
 }
 
 .tableRow:hover .tableCell {
