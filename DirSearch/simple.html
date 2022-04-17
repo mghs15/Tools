@@ -70,20 +70,39 @@ const renderFromList = (list) => {
     let de = "";
     
     //もし、ラインをさらにセルに分けて表示したければ、
-    const pass = f.split("\t");
+    const pass = f.split(",");
     console.log(f, pass)
     const n = pass.length;
     
     for(let i=0; i<n; i++){
-      const cell = pass[i];
-      cell.replace(/(^\"|\"$)/g);
+      let cell = pass[i];
+      cell = cell.replace(/(^\"|\"$)/g,"");
       de += "<div class='tableCell'>" + cell + "</div>";
     }
     
     //ラインのHTML生成
     res += "<div class='tableRow'>" + de + "</div>";
+    
+    //集計
+    if(!globalInfo.summary) globalInfo.summary = {};
+    const key = pass[1].substr(0, 2);
+    if(!globalInfo.summary[key]){
+      globalInfo.summary[key] = 1;
+    }else{
+      globalInfo.summary[key] += 1;
+    }
+    
   }
   res += "</div>";
+  
+  //集計結果
+  if(globalInfo.summary){
+    for(name in globalInfo.summary){
+      res += name + ":" + globalInfo.summary[name] + "; ";
+    }
+    res += "合計は" + list.length + "件です。";
+    delete(globalInfo.summary); //初期化
+  }
   
   const parent = document.getElementById('wrap');
   parent.innerHTML = res;
@@ -179,7 +198,7 @@ body{
   </div>
   <div id="info">
     <div id="searchInputArea"><input type="text" id="searchWord"></div>
-    <div id="infoSearchButton"><button id="searchButton" onClick="searchFiles();">絞り込み</button></div>
+    <div id="infoSearchButton"><button id="searchButton" size="60" onClick="searchFiles();">絞り込み</button></div>
     <div id="infoAddCardButton"><input type="file" id="addCard" onChange="addCard();"></div>
   </div>
   <div id="wrap">
