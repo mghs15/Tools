@@ -23,8 +23,8 @@ const addCard = () => {
   reader.onload = () => {
     
     globalInfo.text = reader.result;
-    globalInfo.text = globalInfo.text.replace(/\r/g, "");
-    globalInfo.list = globalInfo.text.split(/\n/g);
+    //globalInfo.text = globalInfo.text.replace(/\r/g, "");
+    globalInfo.list = globalInfo.text.split(/\r\n/g);
     
     const parent = document.getElementById('wrap');
     parent.innerHTML = "読み込み完了！（" + globalInfo.list.length + "件）";
@@ -58,6 +58,10 @@ const renderFromList = (list) => {
   
   
   res += "<div class='tableOutline'>";
+  
+  //ヘッダが必要ならばここに
+  //res += "ヘッダ";
+  
   for(i in list){
     const f = list[i];
     
@@ -66,12 +70,13 @@ const renderFromList = (list) => {
     let de = "";
     
     //もし、ラインをさらにセルに分けて表示したければ、
-    const pass = f.split(",");
+    const pass = f.split("\t");
     console.log(f, pass)
     const n = pass.length;
     
     for(let i=0; i<n; i++){
       const cell = pass[i];
+      cell.replace(/(^\"|\"$)/g);
       de += "<div class='tableCell'>" + cell + "</div>";
     }
     
