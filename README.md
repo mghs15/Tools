@@ -22,5 +22,8 @@ WebGLの判定用ツール。不十分かも。
 ## [CheckNavigator](https://mghs15.github.io/Tools/CheckNavigator)
 `navigator`の内容を表示するだけのツール。
 
+## [SpreadTidydata](https://mghs15.github.io/Tools/SpreadTidydata)
+Tidyなデータを２次元テーブルに展開。
 
+※詳細な設定はHTMLに直書きなので、ブラウザ上では微調整できません。ダウンロードして使う前提。
 
