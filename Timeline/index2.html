@@ -200,7 +200,7 @@ const renderFromList = (list) => {
             if(cells[ds.ts]){ //詳細の時間
               const startTime = Math.sqrt(Math.abs(cells[ds.ts]));
               const endTime = cells[ds.te] ? Math.sqrt(Math.abs(cells[ds.te])) : 0;
-              const range = endTime ? 30 * Math.abs(startTime - endTime) : 10;
+              const range = endTime ? 30 * Math.abs(startTime - endTime) : 5;
               const offset = tw - 30 * startTime;
               res += phaseGrid;
               res += `<div class='timeBar' `
