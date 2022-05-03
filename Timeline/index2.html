@@ -49,10 +49,10 @@ const ds = {
 
 
 const phaseTime = {
-  "Phase-I": {"start": 100, "end": 50, "color": "#EEEEEE"},
-  "Phase-II": {"start": 50, "end": 30, "color": "#EEEEFF"},
-  "Phase-III": {"start": 30, "end": 10, "color": "#DDDDFF"},
-  "Phase-IV": {"start": 10, "end": 0, "color": "#CCCCFF"}
+  "Phase-I": {"start": 100, "end": 50, "color": "#FFFFFF"},
+  "Phase-II": {"start": 50, "end": 30, "color": "#FFFFF0"},
+  "Phase-III": {"start": 30, "end": 10, "color": "#FFF8F8"},
+  "Phase-IV": {"start": 10, "end": 0, "color": "#FFEEF8"}
 }
 
 
@@ -184,6 +184,7 @@ const renderFromList = (list) => {
             
             //タイムラインエリアの大きさ
             const tw = 300;
+            let margin = 64;
             
             let phaseGrid = "";
             for(key in phaseTime){
@@ -191,7 +192,7 @@ const renderFromList = (list) => {
               const startTime = Math.sqrt(Math.abs(phaseTime[key].start));
               const endTime = Math.sqrt(Math.abs(phaseTime[key].end));
               const range = 30 * Math.abs(startTime - endTime);
-              const offset = tw - 30 * startTime;
+              const offset = margin + tw - 30 * startTime;
               const col = phaseTime[key].color;
               phaseGrid += `<div class='phaseTimeGrid' `
                 + `style='left:${offset}px;width:${range}px;background-color:${col};'></div>`;
@@ -201,23 +202,31 @@ const renderFromList = (list) => {
               const startTime = Math.sqrt(Math.abs(cells[ds.ts]));
               const endTime = cells[ds.te] ? Math.sqrt(Math.abs(cells[ds.te])) : 0;
               const range = endTime ? 30 * Math.abs(startTime - endTime) : 5;
-              const offset = tw - 30 * startTime;
+              const offset = margin + tw - 30 * startTime;
               res += phaseGrid;
               res += `<div class='timeBar' `
                 + `style='left:${offset}px;width:${range}px;'></div>`;
+              res += `<div class='timeBarText' style='left:${offset-margin}px;'>《${-cells[ds.ts]} hr》</div>`;
+              
               res += "</div>"; //timeBarArea
-              res += `<div>《${-cells[ds.ts]}hr》</div>`;
+              res += `<div>《${-cells[ds.ts]} hr》</div>`;
             }else{
               const startTime = Math.sqrt(Math.abs(phaseTime[cells[ds.ph]].start ));
               const endTime = Math.sqrt(Math.abs(phaseTime[cells[ds.ph]].end ));
               const range = 30 * Math.abs(startTime - endTime);
-              const offset = tw - 30 * startTime;
+              const offset = margin + tw - 30 * startTime;
               res += phaseGrid;
               res += `<div class='timeBar' `
                 + `style='left:${offset}px;width:${range}px;'></div>`;
+              res += `<div class='timeBarText' style='left:${offset-margin}px;'>《${cells[ds.ph]}》</div>`;
               res += "</div>"; //timeBarArea
               res += `<div>《${cells[ds.ph]}》</div>`;
             }
+            
+            //その他
+            res += "";
+            
+            
             res += "</div>"; //singleTask
           });
         }
@@ -295,13 +304,13 @@ body{
 
 .singleTask {
   display: grid;
-  grid-template-columns: 100px 250px 350px 150px;
+  grid-template-columns: 100px 250px 400px 150px;
   border-bottom: solid 1px #AAAAAA;
 }
 
 .timeBarArea {
   position: relative;
-  background-color: #EEEEFF;
+  background-color: #F8F8F8;
 }
 
 .phaseTimeGrid {
@@ -315,6 +324,12 @@ body{
   top: 4px;
   height: 10px;
   background-color: #333388;
+}
+
+.timeBarText{
+  position: absolute;
+  font-size: 0.5em;
+  text-align: center;
 }
 
 .tableTitle {
