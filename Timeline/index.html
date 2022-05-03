@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>展開</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script>
+
+const globalInfo = {
+  "text": "",
+  "list": []
+}
+
+
+const addCard = () => {
+  console.log("add");
+  const selectedFile = document.getElementById('addCard').files[0];
+  console.log(selectedFile);
+  
+  const reader = new FileReader();
+  reader.onload = () => {
+    
+    globalInfo.text = reader.result;
+    globalInfo.list = globalInfo.text.split(/\r\n/g);
+    
+    const parent = document.getElementById('wrap');
+    parent.innerHTML = "読み込み完了！（" + globalInfo.list.length + "件）";
+    
+    //メモリを食うっぽいので、最初は表示しない
+    renderFromList(globalInfo.list);
+    
+  }
+  
+  reader.readAsText(selectedFile, 'shift-jis');
+}
+
+const phaseTime = {
+  "Phase-I": {"start": 100, "range": 50},
+  "Phase-II": {"start": 50, "range": 20},
+  "Phase-III": {"start": 30, "range": 20},
+  "Phase-IV": {"start": 10, "range": 10}
+}
+
+const someFunc = (cells, target = 0) => {
+  let res = "";
+  
+  if(cells[8]){ //詳細の時間
+    const offset = 100 * ( phaseTime[cells[1]].start - (+cells[8]) ) / phaseTime[cells[1]].range;
+    res += `<div style='padding-left:${offset}px;'>《－${cells[8]}hr》</div>`;
+  }else{
+    res += "<div></div>";
+  }
+  
+  
+  //フラグによって、先頭の装飾変更
+  if(cells[5]){
+    res += "<div>●";
+  }else if(cells[6]){
+    res += "<div style='color:blue;'>□";
+  }else if(cells[7]){
+    res += "<div style='color:darkgreen;'>□";
+  }else{
+    res += "<div>";
+  }
+  
+  res += cells[3]; //main task
+  //res += " [" + cells[4].replace(/\"/g, "") + "]"; //who
+  
+  res += "</div>";
+  
+  return res;
+}
+
+
+const makeTimetlineIndex = (list, x, y, z) => {
+  
+  //「いつ、どこで、何を」の３要素
+  
+  const res = {};
+  const tmpkxs = [];
+  const tmpkys = [];  
+  const tmpkzs = []; 
+    
+  for(i in list){
+    const f = list[i];
+    
+    if(!f) continue;
+    
+    //ラインをさらにセルに分ける
+    const cells = f.split(/\t/g);
+    
+    console.log(cells);
+    const kx = cells[x];
+    tmpkxs.push(kx);
+    const ky = cells[y];
+    tmpkys.push(ky);
+    
+    const kzarr = cells[z].replace(/\"/g, "").split(/\s*,\s*/g);
+    kzarr.forEach( kz => {
+      tmpkzs.push(kz);
+      
+      if(!res[kx]) res[kx] = {};
+      if(!res[kx][ky]) res[kx][ky] = [];
+      if(!res[kx][ky][kz]) res[kx][ky][kz] = [];
+      
+      const v = someFunc(cells);
+      res[kx][ky][kz].push(v);
+    });
+  
+  }
+  
+  const kxs = [...new Set(tmpkxs)];
+  const kys = [...new Set(tmpkys)];
+  const kzs = [...new Set(tmpkzs)];
+  
+  return {
+    "data": res,
+    "xKeys": kxs,
+    "yKeys": kys,
+    "zKeys": kzs
+  };
+  
+} 
+
+const renderFromList = (list) => {
+  
+  list.splice(0, 1);//ヘッダの削除
+  
+  let res = "";
+  
+  //レンダリング量の確認
+  if(list.length < 1) res += "結果はありません。";
+  
+  if(list.length > 1000){
+    const answer = window.confirm("結果は" + list.length + "件です。すべて表示しますか？");
+    if(!answer){
+      res += "一部（1000件）のみ表示します。";
+      list.splice(1000);
+    }else{
+      res += "結果は" + list.length + "件です。";
+    }
+  }else{
+    res += "結果は" + list.length + "件です。";
+  }
+  
+  //展開
+  const dat = makeTimetlineIndex(list, 2, 1, 4);
+  console.log(dat);
+  
+  const xkeys = dat.xKeys;
+  const ykeys = dat.yKeys;
+  const zkeys = dat.zKeys;
+  const data = dat.data;
+  
+  res += "<div class='tableOutline'>";
+  
+  //ヘッダ用
+  res += "<div class='tableRow'>";
+  res += `<div class='tableCell titleCell'></div>`;
+  ykeys.forEach( yk => {
+    res += `<div class='tableCell titleCell'><strong>${yk}</strong></div>`; //列名
+  });
+  res += "</div>";
+  
+  //本体
+  xkeys.forEach( xk => {
+    res += "<div class='tableRow'>";
+    res += `<div class='tableCell titleCell'><strong>${xk}</strong></div>`; //行名
+    ykeys.forEach( yk => {
+      res += "<div class='tableCell'>";
+      zkeys.forEach( zk => {
+        const va = (data[xk] && data[xk][yk] && data[xk][yk][zk]) ? data[xk][yk][zk] : [];
+        if(va){
+          va.forEach( v => {
+            if(zk){
+              res += `<div class='tableCellContent'>${v}<div>[${zk}]</div></div>`;
+            }else{
+              res += `<div class='tableCellContent'>${v}<div></div></div>`;
+            }
+          });
+        }
+      });
+      res += "</div>"; //tableCell
+    });
+    res += "</div>"; //tableRow
+  });
+  
+  res += "</div>"; //tableOutline
+  
+  const parent = document.getElementById('wrap');
+  parent.innerHTML = res;
+
+}
+
+const searchFiles = () => {
+  const word = document.getElementById("searchWord").value;
+  const words = word.split(/(\s|　)/g);
+  
+  let result = globalInfo.list;
+  
+  words.forEach( w => {
+    if( w.match(/\s/) || w == "　" ) return;
+    result = result.filter(f => f.match(w));
+    console.log(w, result.length);
+  });
+  
+  renderFromList(result);
+}
+
+</script>
+
+<style>
+body{
+  background-color: #FFFFFF;
+}
+
+#info div {
+  display: inline-block;
+}
+
+#memo {
+  background-color: #000000;
+  color: #FFFFFF;
+  border-radius: 4px;
+  margin: 8px;
+  padding: 4px;
+}
+
+#info {
+  margin: 8px;
+  padding: 4px;
+}
+
+#wrap {
+  margin: 8px;
+  padding: 4px;
+}
+
+.tableRow {
+  display: grid;
+  position: relative;
+  grid-template-columns: 25px 1fr 1fr 1fr 1fr;
+}
+
+.tableCell {
+  display: inline-block;
+  background-color: #FFFFFF;
+  border: solid 1px #888888;
+  padding: 4px;
+  overflow-wrap: break-word;
+}
+
+.tableCellContent div {
+  display: inline-block;
+}
+
+.floatCell {
+  position: absolute;
+}
+
+.tableTitle {
+  background-color: #EEEEFF;
+  font-weight: bold;
+  text-align: center;
+}
+
+</style>
+
+</head>
+<body>
+
+<div id="overlayLargeImageSpace"></div>
+<div id="overlayLock"></div>
+<div id="page">
+  <div id="memo">
+  タイトル
+  </div>
+  <div id="info">
+    <div id="searchInputArea"><input type="text" id="searchWord" size="50"></div>
+    <div id="infoSearchButton"><button id="searchButton" onClick="searchFiles();">絞り込み</button></div>
+    <div id="infoAddCardButton"><input type="file" id="addCard" onChange="addCard();"></div>
+  </div>
+  <div id="wrap">
+  </div>
+</div>
+
+<script>
+  
+</script>
+
+</body>
+</html>
+
+
