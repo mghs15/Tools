@@ -291,21 +291,29 @@ body{
   display: grid;
   position: relative;
   grid-template-columns: 100px 1fr;
+  border-bottom: solid 2px #AAAAAA;
 }
+
+.tableRow:first-child {
+  border-top: solid 2px #AAAAAA;
+  background: linear-gradient(#EEEEFF, #FFFFFF);
+}
+
 
 .tableCell {
   display: grid;
   grid-template-columns: 1fr;
-  background-color: #FFFFFF;
-  border: solid 1px #888888;
-  padding: 4px;
+  padding: 0px;
   overflow-wrap: break-word;
 }
 
 .singleTask {
   display: grid;
   grid-template-columns: 100px 250px 400px 150px;
-  border-bottom: solid 1px #AAAAAA;
+}
+
+.singleTask:not(:last-child){
+  border-bottom: solid 1px #BBBBBB;
 }
 
 .timeBarArea {
