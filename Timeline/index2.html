@@ -49,7 +49,7 @@ const ds = {
 
 
 const phaseTime = {
-  "Phase-I": {"start": 100, "end": 50, "color": "#FFFFFF"},
+  "Phase-I": {"start": 100, "end": 50, "color": "#F8F8F8"},
   "Phase-II": {"start": 50, "end": 30, "color": "#FFFFF0"},
   "Phase-III": {"start": 30, "end": 10, "color": "#FFF8F8"},
   "Phase-IV": {"start": 10, "end": 0, "color": "#FFEEF8"}
@@ -103,6 +103,12 @@ const makeTimetlineIndex = (list, x, y, z) => {
   };
   
 } 
+
+
+const timeScaleFunc = (num) => {
+  let r = Math.sign( +num ) * Math.sqrt(Math.abs( +num ));
+  return r; 
+}
 
 const renderFromList = (list) => {
   
@@ -189,8 +195,8 @@ const renderFromList = (list) => {
             let phaseGrid = "";
             for(key in phaseTime){
               const pt = phaseTime[key];
-              const startTime = Math.sqrt(Math.abs(phaseTime[key].start));
-              const endTime = Math.sqrt(Math.abs(phaseTime[key].end));
+              const startTime = timeScaleFunc(phaseTime[key].start);
+              const endTime = timeScaleFunc(phaseTime[key].end);
               const range = 30 * Math.abs(startTime - endTime);
               const offset = margin + tw - 30 * startTime;
               const col = phaseTime[key].color;
@@ -199,8 +205,8 @@ const renderFromList = (list) => {
             }
             
             if(cells[ds.ts]){ //詳細の時間
-              const startTime = Math.sqrt(Math.abs(cells[ds.ts]));
-              const endTime = cells[ds.te] ? Math.sqrt(Math.abs(cells[ds.te])) : 0;
+              const startTime = timeScaleFunc(cells[ds.ts]);
+              const endTime = cells[ds.te] ? timeScaleFunc(cells[ds.te]) : 0;
               const range = endTime ? 30 * Math.abs(startTime - endTime) : 5;
               const offset = margin + tw - 30 * startTime;
               res += phaseGrid;
@@ -209,10 +215,10 @@ const renderFromList = (list) => {
               res += `<div class='timeBarText' style='left:${offset-margin}px;'>《${-cells[ds.ts]} hr》</div>`;
               
               res += "</div>"; //timeBarArea
-              res += `<div>《${-cells[ds.ts]} hr》</div>`;
+              //res += `<div>《${-cells[ds.ts]} hr》</div>`;
             }else{
-              const startTime = Math.sqrt(Math.abs(phaseTime[cells[ds.ph]].start ));
-              const endTime = Math.sqrt(Math.abs(phaseTime[cells[ds.ph]].end ));
+              const startTime = timeScaleFunc(phaseTime[cells[ds.ph]].start);
+              const endTime = timeScaleFunc(phaseTime[cells[ds.ph]].end);
               const range = 30 * Math.abs(startTime - endTime);
               const offset = margin + tw - 30 * startTime;
               res += phaseGrid;
@@ -220,11 +226,11 @@ const renderFromList = (list) => {
                 + `style='left:${offset}px;width:${range}px;'></div>`;
               res += `<div class='timeBarText' style='left:${offset-margin}px;'>《${cells[ds.ph]}》</div>`;
               res += "</div>"; //timeBarArea
-              res += `<div>《${cells[ds.ph]}》</div>`;
+              //res += `<div>《${cells[ds.ph]}》</div>`;
             }
             
             //その他
-            res += "";
+            res += "<div>" + yk + "</div>";
             
             
             res += "</div>"; //singleTask
@@ -292,11 +298,12 @@ body{
   position: relative;
   grid-template-columns: 100px 1fr;
   border-bottom: solid 2px #AAAAAA;
+  background-color: #F8F8F8;
 }
 
 .tableRow:first-child {
   border-top: solid 2px #AAAAAA;
-  background: linear-gradient(#EEEEFF, #FFFFFF);
+  background: linear-gradient(#FFFFFF, #EEEEFF);
 }
 
 
@@ -309,7 +316,7 @@ body{
 
 .singleTask {
   display: grid;
-  grid-template-columns: 100px 250px 400px 150px;
+  grid-template-columns: 100px minmax(275px, 1fr) 425px 150px 0px;
 }
 
 .singleTask:not(:last-child){
@@ -318,7 +325,7 @@ body{
 
 .timeBarArea {
   position: relative;
-  background-color: #F8F8F8;
+  background: linear-gradient(90deg, #FFFFFF00, #FFFFFF 10%, #FFFFFF 95%, #FFFFFF00);
 }
 
 .phaseTimeGrid {
@@ -329,21 +336,21 @@ body{
 
 .timeBar{
   position: absolute;
-  top: 4px;
-  height: 10px;
+  top: 8px;
+  height: 8px;
   background-color: #333388;
 }
 
 .timeBarText{
   position: absolute;
+  top: 4px;
   font-size: 0.5em;
   text-align: center;
 }
 
-.tableTitle {
-  background-color: #EEEEFF;
+.titleCell {
   font-weight: bold;
-  text-align: center;
+  padding: 4px;
 }
 
 </style>
