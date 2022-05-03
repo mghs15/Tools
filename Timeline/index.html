@@ -22,6 +22,7 @@ const addCard = () => {
     
     globalInfo.text = reader.result;
     globalInfo.list = globalInfo.text.split(/\r\n/g);
+    globalInfo.list.splice(0, 1);//ヘッダの削除
     
     const parent = document.getElementById('wrap');
     parent.innerHTML = "読み込み完了！（" + globalInfo.list.length + "件）";
@@ -123,8 +124,6 @@ const makeTimetlineIndex = (list, x, y, z) => {
 } 
 
 const renderFromList = (list) => {
-  
-  list.splice(0, 1);//ヘッダの削除
   
   let res = "";
   
