@@ -35,47 +35,28 @@ const addCard = () => {
   reader.readAsText(selectedFile, 'shift-jis');
 }
 
-const phaseTime = {
-  "Phase-I": {"start": 100, "range": 50},
-  "Phase-II": {"start": 50, "range": 20},
-  "Phase-III": {"start": 30, "range": 20},
-  "Phase-IV": {"start": 10, "range": 10}
+const ds = {
+  "ts": 8, //開始時間
+  "te": 9, //終了時間
+  "ph": 1, //phase
+  "ca": 2, //カテゴリ分け
+  "mt": 3, //メインタスク
+  "op": 4, //オペレーター
+  "f1": 5, //フラグ
+  "f2": 6,
+  "f7": 7
 }
 
-const someFunc = (cells, target = 0) => {
-  let res = "";
-  
-  if(cells[8]){ //詳細の時間
-    const offset = 100 * ( phaseTime[cells[1]].start - (+cells[8]) ) / phaseTime[cells[1]].range;
-    res += `<div style='padding-left:${offset}px;'>《－${cells[8]}hr》</div>`;
-  }else{
-    res += "<div></div>";
-  }
-  
-  
-  //フラグによって、先頭の装飾変更
-  if(cells[5]){
-    res += "<div>●";
-  }else if(cells[6]){
-    res += "<div style='color:blue;'>□";
-  }else if(cells[7]){
-    res += "<div style='color:darkgreen;'>□";
-  }else{
-    res += "<div>";
-  }
-  
-  res += cells[3]; //main task
-  //res += " [" + cells[4].replace(/\"/g, "") + "]"; //who
-  
-  res += "</div>";
-  
-  return res;
+
+const phaseTime = {
+  "Phase-I": {"start": 100, "end": 50, "color": "#EEEEEE"},
+  "Phase-II": {"start": 50, "end": 30, "color": "#EEEEFF"},
+  "Phase-III": {"start": 30, "end": 10, "color": "#DDDDFF"},
+  "Phase-IV": {"start": 10, "end": 0, "color": "#CCCCFF"}
 }
 
 
 const makeTimetlineIndex = (list, x, y, z) => {
-  
-  //「いつ、どこで、何を」の３要素
   
   const res = {};
   const tmpkxs = [];
@@ -104,8 +85,7 @@ const makeTimetlineIndex = (list, x, y, z) => {
       if(!res[kx][ky]) res[kx][ky] = [];
       if(!res[kx][ky][kz]) res[kx][ky][kz] = [];
       
-      const v = someFunc(cells);
-      res[kx][ky][kz].push(v);
+      res[kx][ky][kz].push(cells);
     });
   
   }
@@ -143,7 +123,7 @@ const renderFromList = (list) => {
   }
   
   //展開
-  const dat = makeTimetlineIndex(list, 2, 1, 4);
+  const dat = makeTimetlineIndex(list, ds.ca, ds.ph, ds.op);
   console.log(dat);
   
   const xkeys = dat.xKeys;
@@ -170,12 +150,35 @@ const renderFromList = (list) => {
       zkeys.forEach( zk => {
         const va = (data[xk] && data[xk][yk] && data[xk][yk][zk]) ? data[xk][yk][zk] : [];
         if(va){
-          va.forEach( v => {
-            if(zk){
-              res += `<div class='tableCellContent'>${v}<div>[${zk}]</div></div>`;
+          va.forEach( cells => {
+            
+            if(cells[ds.ts]){ //詳細の時間
+              const offset = 100 
+                * ( phaseTime[cells[ds.ph]].start - (+cells[ds.ts]) ) 
+                / Math.abs(phaseTime[cells[ds.ph]].end - phaseTime[cells[ds.ph]].start);
+              res += `<div class='tableCellContent' style='padding-left:${offset}px;'>《－${cells[ds.ts]}hr》`;
             }else{
-              res += `<div class='tableCellContent'>${v}<div></div></div>`;
+              res += "<div class='tableCellContent'>";
             }
+            
+            
+            //フラグによって、先頭の装飾変更
+            if(cells[ds.f1]){
+              res += "<span>●";
+            }else if(cells[ds.f2]){
+              res += "<span style='color:blue;'>□";
+            }else if(cells[ds.f3]){
+              res += "<span style='color:darkgreen;'>□";
+            }else{
+              res += "<span>";
+            }
+            
+            res += cells[ds.mt];
+            
+            if(zk) res += ` [${zk}]`;
+            
+            res += "</span>"
+            res += "</div>"; //tableCellContent
           });
         }
       });

@@ -1,26 +1,26 @@
-id	phase	category	action	operator	flag1	flag2	flag3	detailtime
-is-s001	Phase-I	Scenario	イベント発火１					100
-is-s002	Phase-I	Scenario	イベント１					80
-is-s003	Phase-II	Scenario	イベント発火２					50
-is-s004	Phase-II	Scenario	イベント２					45
-is-s005	Phase-III	Scenario	イベント発火３					30
-is-s006	Phase-III	Scenario	イベント３					25
-is-s007	Phase-III	Scenario	サブイベント３					20
-is-s008	Phase-IV	Scenario	イベント発火４					10
-is-s009	Phase-IV	Scenario	イベント４					0
-id-0001	Phase-I	AAA	何かやることを書くA	"Leef, Fjeo"	1			
-id-0002	Phase-I	BBB	何かやることを書くB	"Hoouese,Booo"	1			
-id-0003	Phase-I	CCC	色々とやることが大変。	"Leef, Fjeo"		1		
-id-0004	Phase-II	AAA	何かやることを書くC	"Hoouese,Booo"			1	
-id-0005	Phase-II	BBB	何かやることを書くF	"Leef, Fjeo"		1		
-id-0006	Phase-II	CCC	やることがたくさんあって大変。	All	1			
-id-0007	Phase-II	CCC	何かやることを書くD	"Leef, Fjeo"				
-id-0008	Phase-II	DDD	何かやることを書くG	"Hoouese,Booo"	1			
-id-0009	Phase-II	EEE	何かやることを書くH	"Leef, Fjeo,Booo"				
-id-0010	Phase-III	AAA	何かやることを書く（長くなることもある。）	"Hoouese,Booo"		1		
-id-0011	Phase-III	CCC	何かやることを書くI	"Leef, Fjeo"	1			
-id-0012	Phase-III	CCC	何かやることを書くJ	Hoouese		1		
-id-0013	Phase-III	CCC	何かやることを書くK	"Leef, Fjeo"			1	
-id-0014	Phase-III	EEE	何かやることを書くL	"Hoouese,Booo"		1		
-id-0015	Phase-IV	AAA	何かやることを書くM	Leef	1			
-id-0016	Phase-IV	EEE	何かやることを書くN	"Hoouese,Booo"			1	
+id	phase	category	action	operator	flag1	flag2	flag3	start	end
+is-s001	Phase-I	Scenario	イベント発火１					100	
+is-s002	Phase-I	Scenario	イベント１					80	70
+is-s003	Phase-II	Scenario	イベント発火２					50	
+is-s004	Phase-II	Scenario	イベント２					45	30
+is-s005	Phase-III	Scenario	イベント発火３					30	
+is-s006	Phase-III	Scenario	イベント３					25	10
+is-s007	Phase-III	Scenario	サブイベント３					20	15
+is-s008	Phase-IV	Scenario	イベント発火４					10	
+is-s009	Phase-IV	Scenario	イベント４					0	
+id-0001	Phase-I	AAA	何かやることを書く	"Leef, Fjeo"	1				
+id-0002	Phase-I	BBB	何かやることを書く	"Hoouese,Booo"	1				
+id-0003	Phase-I	CCC	色々とやることが大変。	"Leef, Fjeo"		1			
+id-0004	Phase-II	AAA	何かやることを書く	"Hoouese,Booo"			1		
+id-0005	Phase-II	BBB	何かやることを書く	"Leef, Fjeo"		1			
+id-0006	Phase-II	CCC	やることがたくさんあって大変。	All	1				
+id-0007	Phase-II	CCC	何かやることを書く	"Leef, Fjeo"					
+id-0008	Phase-II	DDD	何かやることを書く	"Hoouese,Booo"	1				
+id-0009	Phase-II	EEE	何かやることを書く	"Leef, Fjeo,Booo"					
+id-0010	Phase-III	AAA	何かやることを書く（長くなることもある。）	"Hoouese,Booo"		1			
+id-0011	Phase-III	CCC	何かやることを書く	"Leef, Fjeo"	1				
+id-0012	Phase-III	CCC	何かやることを書く	Hoouese		1			
+id-0013	Phase-III	CCC	何かやることを書く	"Leef, Fjeo"			1		
+id-0014	Phase-III	EEE	何かやることを書く	"Hoouese,Booo"		1			
+id-0015	Phase-IV	AAA	何かやることを書く	Leef	1				
+id-0016	Phase-IV	EEE	何かやることを書く	"Hoouese,Booo"			1		
