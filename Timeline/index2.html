@@ -49,10 +49,10 @@ const ds = {
 
 
 const phaseTime = {
-  "Phase-I": {"start": 100, "end": 50, "color": "#F8F8F8"},
-  "Phase-II": {"start": 50, "end": 30, "color": "#FFFFF0"},
-  "Phase-III": {"start": 30, "end": 10, "color": "#FFF8F8"},
-  "Phase-IV": {"start": 10, "end": 0, "color": "#FFEEF8"}
+  "Phase-I": {"start": 100, "end": 50, "color": "#EEEEEE"},
+  "Phase-II": {"start": 50, "end": 30, "color": "#FFFFEE"},
+  "Phase-III": {"start": 30, "end": 10, "color": "#FFEEEE"},
+  "Phase-IV": {"start": 10, "end": 0, "color": "#FFDDFF"}
 }
 
 
@@ -107,7 +107,7 @@ const makeTimetlineIndex = (list, x, y, z) => {
 
 const timeScaleFunc = (num) => {
   let r = Math.sign( +num ) * Math.sqrt(Math.abs( +num ));
-  return r; 
+  return Math.floor(r); 
 }
 
 const renderFromList = (list) => {
@@ -150,7 +150,6 @@ const renderFromList = (list) => {
   res += "</div>";
   }*/
   
-
   //本体
   xkeys.forEach( xk => {
     res += "<div class='tableRow'>";
@@ -206,8 +205,8 @@ const renderFromList = (list) => {
             
             if(cells[ds.ts]){ //詳細の時間
               const startTime = timeScaleFunc(cells[ds.ts]);
-              const endTime = cells[ds.te] ? timeScaleFunc(cells[ds.te]) : 0;
-              const range = endTime ? 30 * Math.abs(startTime - endTime) : 5;
+              const endTime = cells[ds.te] ? timeScaleFunc(cells[ds.te]) : "";
+              const range = (endTime || endTime === 0) ? 30 * Math.abs(startTime - endTime) : 8;
               const offset = margin + tw - 30 * startTime;
               res += phaseGrid;
               res += `<div class='timeBar' `
@@ -316,7 +315,7 @@ body{
 
 .singleTask {
   display: grid;
-  grid-template-columns: 100px minmax(275px, 1fr) 425px 150px 0px;
+  grid-template-columns: 100px minmax(200px, 1fr) 425px 150px;
 }
 
 .singleTask:not(:last-child){
@@ -326,19 +325,25 @@ body{
 .timeBarArea {
   position: relative;
   background: linear-gradient(90deg, #FFFFFF00, #FFFFFF 10%, #FFFFFF 95%, #FFFFFF00);
+  margin: 2px;
+
 }
 
 .phaseTimeGrid {
   position: absolute;
+  /*top: 4px;
+  height:16px;
+  */ 
   top: 0px;
   height: 100%;
 }
 
 .timeBar{
   position: absolute;
-  top: 8px;
+  top: 6px;
   height: 8px;
   background-color: #333388;
+  border-radius: 4px;
 }
 
 .timeBarText{
