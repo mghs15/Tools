@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>展開</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script>
+
+const globalInfo = {
+  "text": "",
+  "list": []
+}
+
+
+const addCard = () => {
+  console.log("add");
+  const selectedFile = document.getElementById('addCard').files[0];
+  console.log(selectedFile);
+  
+  const reader = new FileReader();
+  reader.onload = () => {
+    
+    globalInfo.text = reader.result;
+    globalInfo.list = globalInfo.text.split(/\r\n/g);
+    globalInfo.list.splice(0, 1);//ヘッダの削除
+    
+    const parent = document.getElementById('wrap');
+    parent.innerHTML = "読み込み完了！（" + globalInfo.list.length + "件）";
+    
+    //メモリを食うっぽいので、最初は表示しない
+    renderFromList(globalInfo.list);
+    
+  }
+  
+  reader.readAsText(selectedFile, 'shift-jis');
+}
+
+const ds = {
+  "ts": 8, //開始時間
+  "te": 9, //終了時間
+  "ph": 1, //phase
+  "ca": 2, //カテゴリ分け
+  "mt": 3, //メインタスク
+  "op": 4, //オペレーター
+  "f1": 5, //フラグ
+  "f2": 6,
+  "f7": 7
+}
+
+
+const phaseTime = {
+  "Phase-I": {"start": 100, "end": 50, "color": "#FFFFFF"},
+  "Phase-II": {"start": 50, "end": 30, "color": "#EEEEFF"},
+  "Phase-III": {"start": 30, "end": 10, "color": "#DDDDFF"},
+  "Phase-IV": {"start": 10, "end": 0, "color": "#CCCCFF"}
+}
+
+
+const makeTimetlineIndex = (list, x, y, z) => {
+  
+  const res = {};
+  const tmpkxs = [];
+  const tmpkys = [];  
+  const tmpkzs = []; 
+    
+  for(i in list){
+    const f = list[i];
+    
+    if(!f) continue;
+    
+    //ラインをさらにセルに分ける
+    const cells = f.split(/\t/g);
+    
+    console.log(cells);
+    const kx = cells[x];
+    tmpkxs.push(kx);
+    const ky = cells[y];
+    tmpkys.push(ky);
+    
+    const kzarr = cells[z].replace(/\"/g, "").split(/\s*,\s*/g);
+    kzarr.forEach( kz => {
+      tmpkzs.push(kz);
+      
+      if(!res[kx]) res[kx] = {};
+      if(!res[kx][ky]) res[kx][ky] = [];
+      if(!res[kx][ky][kz]) res[kx][ky][kz] = [];
+      
+      res[kx][ky][kz].push(cells);
+    });
+  
+  }
+  
+  const kxs = [...new Set(tmpkxs)];
+  const kys = [...new Set(tmpkys)];
+  const kzs = [...new Set(tmpkzs)];
+  
+  return {
+    "data": res,
+    "xKeys": kxs,
+    "yKeys": kys,
+    "zKeys": kzs
+  };
+  
+} 
+
+const renderFromList = (list) => {
+  
+  let res = "";
+  
+  //レンダリング量の確認
+  /*
+  if(list.length < 1) res += "結果はありません。";
+  
+  if(list.length > 1000){
+    const answer = window.confirm("結果は" + list.length + "件です。すべて表示しますか？");
+    if(!answer){
+      res += "一部（1000件）のみ表示します。";
+      list.splice(1000);
+    }else{
+      res += "結果は" + list.length + "件です。";
+    }
+  }else{
+    res += "結果は" + list.length + "件です。";
+  }
+  */
+
+res += `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`;
+
+res += "\n\n";
+
+res += `<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">`;
+res += `<p:cSld>`;
+
+res += `<p:spTree>`;
+res += `<p:nvGrpSpPr>`;
+res += `<p:cNvPr id="1" name=""/>`;
+res += `<p:cNvGrpSpPr/>`;
+res += `<p:nvPr/>`;
+res += `</p:nvGrpSpPr>`;
+res += `<p:grpSpPr>`;
+res += `<a:xfrm>`;
+res += `<a:off x="0" y="0"/>`;
+res += `<a:ext cx="0" cy="0"/>`;
+res += `<a:chOff x="0" y="0"/>`;
+res += `<a:chExt cx="0" cy="0"/>`;
+res += `</a:xfrm>`;
+res += `</p:grpSpPr>`;
+
+res += "\n\n";
+
+  //展開
+  const dat = makeTimetlineIndex(list, ds.ca, ds.ph, ds.op);
+  console.log(dat);
+  
+  const xkeys = dat.xKeys;
+  const ykeys = dat.yKeys;
+  const zkeys = dat.zKeys;
+  const data = dat.data;
+  
+  //res += "<div class='tableOutline'>";
+  
+  //ヘッダ用
+  /*
+  res += "<div class='tableRow'>";
+  res += `<div class='tableCell titleCell'></div>`;
+  ykeys.forEach( yk => {
+    res += `<div class='tableCell titleCell'><strong>${yk}</strong></div>`; //列名
+  });
+  res += "</div>";
+  */
+  
+  //本体
+  xkeys.forEach( xk => {
+    //res += "<div class='tableRow'>";
+    //res += `<div class='tableCell titleCell'><strong>${xk}</strong></div>`; //行名
+    
+    boxHeight = 9601200 / xkeys.length; //要調整
+    const xn = xkeys.findIndex( target => { console.log(target, xk, target === xk); return target === xk });
+    const boxOffsetX = xn * boxHeight;
+    
+    res += makeBox({lines: [{
+      "text": xk, "bold": true, "color": "000000"}
+    ], offsetX: boxOffsetX, offsetY: -1000000, width: 1000000, height: boxHeight});
+    res += "\n\n";
+    
+    
+    ykeys.forEach( yk => {
+      //res += "<div class='tableCell'>";
+      
+      boxWidth = 12801600 / ykeys.length;
+      const yn = ykeys.findIndex( target => { console.log(target, yk, target === yk); return target === yk });
+      const boxOffsetY = yn * boxWidth;
+      
+      res += makeBox({lines: [{
+        "text": yk, "bold": true, "color": "000000"}
+      ], offsetX: -1000000, offsetY: boxOffsetY, width: boxWidth, height: 1000000});
+      res += "\n\n";
+    
+      const lines = [];
+      zkeys.forEach( zk => {
+        const va = (data[xk] && data[xk][yk] && data[xk][yk][zk]) ? data[xk][yk][zk] : [];
+        va.forEach( cells => {
+          let r = "";
+          let tcol = "565656";
+
+          //フラグによって、先頭の装飾変更
+          if(cells[ds.f1]){
+            r += "●";
+            tcol = "0000FF";
+          }else if(cells[ds.f2]){
+            r += "□";
+            tcol = "FF0000";
+          }else if(cells[ds.f3]){
+            r += "□";
+          }else{
+            r += "";
+          }
+
+          r += cells[ds.mt];
+          if(zk) r += ` [${zk}]`;
+          
+          lines.push({"color": tcol,"text": r});
+          
+        });
+        
+      });
+      
+      res += makeBox({lines: lines, offsetX: boxOffsetX, offsetY: boxOffsetY, width: boxWidth, height: boxHeight});
+      res += "\n\n";
+      
+      //res += "</div>"; //tableCell
+    });
+    //res += "</div>"; //tableRow
+  });
+  
+  //res += "</div>"; //tableOutline
+  
+  
+res += `</p:spTree>`; 
+res += `<p:extLst>`; 
+res += `<p:ext uri="">`; 
+res += `<p14:creationId xmlns:p14="http://schemas.microsoft.com/office/powerpoint/2010/main" val=""/>`; //val???
+res += `</p:ext>`; 
+res += `</p:extLst>`; 
+res += `</p:cSld>`; 
+res += `<p:clrMapOvr>`; 
+res += `<a:masterClrMapping/>`; 
+res += `</p:clrMapOvr>`; 
+res += `</p:sld>`; 
+
+  const output = document.getElementById('textBox');
+  output.value = res;
+
+//res = res.replace(/</g, "&lt;");
+//res = res.replace(/>/g, "&gt;");
+//res = res.replace(/\n/g, "<br>");
+
+  /*
+  const parent = document.getElementById('wrap');
+  parent.innerHTML = res;
+  */
+}
+
+const searchFiles = () => {
+  const word = document.getElementById("searchWord").value;
+  const words = word.split(/(\s|　)/g);
+  
+  let result = globalInfo.list;
+  
+  words.forEach( w => {
+    if( w.match(/\s/) || w == "　" ) return;
+    result = result.filter(f => f.match(w));
+    console.log(w, result.length);
+  });
+  
+  renderFromList(result);
+}
+
+
+const makeBox = (para) => {
+  //BOXの位置、大きさ
+  const offsetX = para.offsetX || 0;
+  const offsetY = para.offsetY || 0;
+  const width = para.width || 0;
+  const height = para.height || 0;
+  
+  
+  const fillCol = para.fillCol || "EEEEF8";
+  const lineCol = para.lineCol || "AAAAFF";
+  
+  //文字・文章の設定
+  const lines = para.lines || [];
+  
+  const rand = Math.floor(Math.random() * 10000);
+  
+//----------------------------------
+
+let tt = "";
+
+//以下、テンプレート
+
+tt += `<p:sp>`;
+
+tt += `<p:nvSpPr>`;
+tt += `<p:cNvPr id="${rand}" name="正方形/長方形 ${rand}">`; //id
+tt += `<a:extLst>`;
+tt += `<a:ext uri="">`; //???
+tt += `<a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id=""/>`; //id???
+tt += `</a:ext>`;
+tt += `</a:extLst>`;
+tt += `</p:cNvPr>`;
+tt += `<p:cNvSpPr/>`;
+tt += `<p:nvPr/>`;
+tt += `</p:nvSpPr>`;
+
+tt += `<p:spPr>`;
+tt += `<a:xfrm>`;
+tt += `<a:off x="${offsetY}" y="${offsetX}"/>`; //オフセット
+tt += `<a:ext cx="${width}" cy="${height}"/>`; //サイズ
+tt += `</a:xfrm>`;
+tt += `<a:prstGeom prst="rect">`;
+tt += `<a:avLst/>`;
+tt += `</a:prstGeom>`;
+tt += `<a:solidFill>`;
+tt += `<a:srgbClr val="${fillCol}"/>`; //塗りつぶしの色
+tt += `</a:solidFill>`;
+tt += `<a:ln>`;
+tt += `<a:solidFill>`;
+tt += `<a:srgbClr val="${lineCol}"/>`; //線の色
+tt += `</a:solidFill>`;
+tt += `</a:ln>`;
+tt += `</p:spPr>`;
+
+tt += `<p:style>`;
+tt += `<a:lnRef idx="2">`;
+tt += `<a:schemeClr val="accent1">`;
+tt += `<a:shade val="50000"/>`;
+tt += `</a:schemeClr>`;
+tt += `</a:lnRef>`;
+tt += `<a:fillRef idx="1">`;
+tt += `<a:schemeClr val="accent1"/>`;
+tt += `</a:fillRef>`;
+tt += `<a:effectRef idx="0">`;
+tt += `<a:schemeClr val="accent1"/>`;
+tt += `</a:effectRef>`;
+tt += `<a:fontRef idx="minor">`;
+tt += `<a:schemeClr val="lt1"/>`;
+tt += `</a:fontRef>`;
+tt += `</p:style>`;
+
+tt += `<p:txBody>`;
+tt += `<a:bodyPr rtlCol="0" anchor="ctr"/>`;
+tt += `<a:lstStyle/>`;
+
+
+//改行時は<a:p>～</a:p>のまとまりを増やす。
+lines.forEach( line => {
+
+  let r = line.text || line || "";
+  let tcol = line.color || "555555";
+  let size = `sz="${line.size || 1100}"`;
+  let bold = line.bold ?`b="1"` : "";
+
+  tt += `<a:p>`;
+  //tt += `<a:pPr algn="ctr"/>`; //中央ぞろえ
+  tt += `<a:r>`;
+  tt += `<a:rPr kumimoji="1" lang="ja-JP" altLang="en-US" ${size} ${bold} dirty="0">`; //太字やサイズの調整
+  tt += `<a:solidFill>`;
+  tt += `<a:srgbClr val="${tcol}"/>`; //文字色
+  tt += `</a:solidFill>`;
+  tt += `</a:rPr>`;
+  tt += `<a:t>${r}</a:t>`; //テキスト内容
+  tt += `</a:r>`;
+  tt += `</a:p>`;
+
+});
+      
+tt += `</p:txBody>`;
+tt += `</p:sp>`;
+//----------------------------------
+
+  return tt;
+
+}
+
+const copy = () => {
+  const copyText = document.querySelector("#textBox");
+  console.log(copyText);
+  copyText.select();
+  document.execCommand("copy");
+}
+
+</script>
+
+<style>
+body{
+  background-color: #FFFFFF;
+}
+
+#info div {
+  display: inline-block;
+}
+
+#memo {
+  background-color: #000000;
+  color: #FFFFFF;
+  border-radius: 4px;
+  margin: 8px;
+  padding: 4px;
+}
+
+#info {
+  margin: 8px;
+  padding: 4px;
+}
+
+#wrap {
+  margin: 8px;
+  padding: 4px;
+}
+
+.tableRow {
+  display: grid;
+  position: relative;
+  grid-template-columns: 25px 1fr 1fr 1fr 1fr;
+}
+
+.tableCell {
+  display: inline-block;
+  background-color: #FFFFFF;
+  border: solid 1px #888888;
+  padding: 4px;
+  overflow-wrap: break-word;
+}
+
+.tableCellContent div {
+  display: inline-block;
+}
+
+.floatCell {
+  position: absolute;
+}
+
+.tableTitle {
+  background-color: #EEEEFF;
+  font-weight: bold;
+  text-align: center;
+}
+
+</style>
+
+</head>
+<body>
+
+<div id="overlayLargeImageSpace"></div>
+<div id="overlayLock"></div>
+<div id="page">
+  <div id="memo">
+  タイトル
+  </div>
+  <div id="info">
+    <div id="searchInputArea"><input type="text" id="searchWord" size="50"></div>
+    <div id="infoSearchButton"><button id="searchButton" onClick="searchFiles();">絞り込み</button></div>
+    <div id="infoAddCardButton"><input type="file" id="addCard" onChange="addCard();"></div>
+    <div><textarea id="textBox" rows="30" cols="120"></textarea></div>
+    <div id="infoSearchButton"><button id="searchButton" onClick="copy();">コピー</button></div>
+  </div>
+  <div id="wrap">
+  </div>
+</div>
+
+<script>
+  
+</script>
+
+</body>
+</html>
+
+
