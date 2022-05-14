@@ -35,4 +35,6 @@ Tidyなデータを２次元テーブルに展開。
 
 [ガントチャート形式](https://mghs15.github.io/Tools/Timeline/index2.html)
 
+[ガントチャート形式（docx形式）](https://mghs15.github.io/Tools/Timeline/spread2document.html)　※大雑把なチャート
+
 ※詳細な設定はHTMLに直書きなので、ブラウザ上では微調整できません。ダウンロードして使う前提。
