@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>展開</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script>
+
+const globalInfo = {
+  "text": "",
+  "list": []
+}
+
+
+const addCard = () => {
+  console.log("add");
+  const selectedFile = document.getElementById('addCard').files[0];
+  console.log(selectedFile);
+  
+  const reader = new FileReader();
+  reader.onload = () => {
+    
+    globalInfo.text = reader.result;
+    globalInfo.list = globalInfo.text.split(/\r\n/g);
+    globalInfo.list.splice(0, 1);//ヘッダの削除
+    
+    const parent = document.getElementById('wrap');
+    parent.innerHTML = "読み込み完了！（" + globalInfo.list.length + "件）";
+    
+    //メモリを食うっぽいので、最初は表示しない
+    renderFromList(globalInfo.list);
+    
+  }
+  
+  reader.readAsText(selectedFile, 'shift-jis');
+}
+
+const ds = {
+  "ts": 8, //開始時間
+  "te": 9, //終了時間
+  "ph": 1, //phase
+  "ca": 2, //カテゴリ分け
+  "mt": 3, //メインタスク
+  "op": 4, //オペレーター
+  "f1": 5, //フラグ
+  "f2": 6,
+  "f3": 7
+}
+
+
+const phaseTime = {
+  "Phase-0": {"start": 200, "end": 100, "color": "#FFFFFF", "doc_width": 250, "doc_div": 1},
+  "Phase-I": {"start": 100, "end": 50, "color": "#EEEEEE"},
+  "Phase-II": {"start": 50, "end": 30, "color": "#EEEEFF"},
+  "Phase-III": {"start": 30, "end": 10, "color": "#DDDDFF"},
+  "Phase-IV": {"start": 10, "end": 0, "color": "#CCCCFF"},
+  "Phase-V": {"start": 0, "end": -10, "color": "#DDDDDD", "doc_width": 250, "doc_div": 1}
+}
+
+
+const makeTimetlineIndex = (list, x, y, z) => {
+  
+  const res = {};
+  const tmpkxs = [];
+  const tmpkys = [];  
+  const tmpkzs = []; 
+    
+  for(i in list){
+    const f = list[i];
+    
+    if(!f) continue;
+    
+    //ラインをさらにセルに分ける
+    const cells = f.split(/\t/g);
+    
+    console.log(cells);
+    const kx = cells[x];
+    tmpkxs.push(kx);
+    const ky = cells[y];
+    tmpkys.push(ky);
+    
+    const kzarr = cells[z].replace(/\"/g, "").split(/\s*,\s*/g);
+    kzarr.forEach( kz => {
+      tmpkzs.push(kz);
+      
+      if(!res[kx]) res[kx] = {};
+      if(!res[kx][ky]) res[kx][ky] = [];
+      if(!res[kx][ky][kz]) res[kx][ky][kz] = [];
+      
+      res[kx][ky][kz].push(cells);
+    });
+  
+  }
+  
+  const kxs = [...new Set(tmpkxs)];
+  const kys = [...new Set(tmpkys)];
+  const kzs = [...new Set(tmpkzs)];
+  
+  return {
+    "data": res,
+    "xKeys": kxs,
+    "yKeys": kys,
+    "zKeys": kzs
+  };
+  
+} 
+
+const renderFromList = (list) => {
+  
+  let res = "";
+  
+
+//XMLの開始部分
+res += `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`;
+
+res += "\n\n";
+
+res += `<w:document xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas" `;
+  res += `xmlns:cx="http://schemas.microsoft.com/office/drawing/2014/chartex" `;
+  res += `xmlns:cx1="http://schemas.microsoft.com/office/drawing/2015/9/8/chartex" `;
+  res += `xmlns:cx2="http://schemas.microsoft.com/office/drawing/2015/10/21/chartex" `;
+  res += `xmlns:cx3="http://schemas.microsoft.com/office/drawing/2016/5/9/chartex" `;
+  res += `xmlns:cx4="http://schemas.microsoft.com/office/drawing/2016/5/10/chartex" `;
+  res += `xmlns:cx5="http://schemas.microsoft.com/office/drawing/2016/5/11/chartex" `;
+  res += `xmlns:cx6="http://schemas.microsoft.com/office/drawing/2016/5/12/chartex" `;
+  res += `xmlns:cx7="http://schemas.microsoft.com/office/drawing/2016/5/13/chartex" `;
+  res += `xmlns:cx8="http://schemas.microsoft.com/office/drawing/2016/5/14/chartex" `;
+  res += `xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" `;
+  res += `xmlns:aink="http://schemas.microsoft.com/office/drawing/2016/ink" `;
+  res += `xmlns:am3d="http://schemas.microsoft.com/office/drawing/2017/model3d" `;
+  res += `xmlns:o="urn:schemas-microsoft-com:office:office" `;
+  res += `xmlns:oel="http://schemas.microsoft.com/office/2019/extlst" `;
+  res += `xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" `;
+  res += `xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" `;
+  res += `xmlns:v="urn:schemas-microsoft-com:vml" `;
+  res += `xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" `;
+  res += `xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" `;
+  res += `xmlns:w10="urn:schemas-microsoft-com:office:word" `;
+  res += `xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" `;
+  res += `xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" `;
+  res += `xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" `;
+  res += `xmlns:w16cex="http://schemas.microsoft.com/office/word/2018/wordml/cex" `;
+  res += `xmlns:w16cid="http://schemas.microsoft.com/office/word/2016/wordml/cid" `;
+  res += `xmlns:w16="http://schemas.microsoft.com/office/word/2018/wordml" `;
+  res += `xmlns:w16sdtdh="http://schemas.microsoft.com/office/word/2020/wordml/sdtdatahash" `;
+  res += `xmlns:w16se="http://schemas.microsoft.com/office/word/2015/wordml/symex" `;
+  res += `xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" `;
+  res += `xmlns:wpi="http://schemas.microsoft.com/office/word/2010/wordprocessingInk" `;
+  res += `xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml" `;
+  res += `xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" `;
+  res += `mc:Ignorable="w14 w15 w16se w16cid w16 w16cex w16sdtdh wp14">`;
+  
+res += `<w:body>`;
+
+res += `<w:tbl>`;
+res += `<w:tblPr>`;
+res += `<w:tblStyle w:val="a3"/>`;
+res += `<w:tblW w:w="0" w:type="auto"/>`;
+
+res += `<w:tblBorders>`;
+res += `<w:top w:val="none" w:sz="0" w:space="0" w:color="auto"/>`; // 上の線
+res += `<w:left w:val="none" w:sz="0" w:space="0" w:color="auto"/>`;
+res += `<w:bottom w:val="none" w:sz="0" w:space="0" w:color="auto"/>`; //下の線
+res += `<w:right w:val="none" w:sz="0" w:space="0" w:color="auto"/>`;
+res += `<w:insideH w:val="none" w:sz="0" w:space="0" w:color="auto"/>`;
+res += `<w:insideV w:val="none" w:sz="0" w:space="0" w:color="auto"/>`;
+res += `</w:tblBorders>`;
+
+res += `<w:tblLook w:val="04A0" w:firstRow="1" w:lastRow="0" w:firstColumn="1" w:lastColumn="0" w:noHBand="0" w:noVBand="1"/>`;
+res += `</w:tblPr>`;
+
+res += "\n\n";
+
+//決め打ちでカラムの数、サイズを決定。
+const dfivn = 6;
+const phaseGridSize = [];
+for( phase in phaseTime){
+  if(!phaseTime[phase].sub){
+    const ivn = phaseTime[phase].doc_div|| dfivn;
+    const totalRange = phaseTime[phase].doc_width || 1500;
+    for( let i=0; i<ivn; i++){
+      phaseGridSize.push( Math.floor(totalRange / ivn) );
+    }
+  }
+}
+const grid = [1406, 1406, 3141, ...phaseGridSize, 1385];
+res += makeGridSet( grid );
+res += "\n\n";
+
+  //展開
+  const dat = makeTimetlineIndex(list, ds.ca, ds.ph, ds.op);
+  console.log(dat);
+  
+  const xkeys = dat.xKeys;
+  const ykeys = dat.yKeys;
+  const zkeys = dat.zKeys;
+  const data = dat.data;
+  
+  //本体
+  xkeys.forEach( xk => {
+    let xName = xk;
+    ykeys.forEach( yk => {
+      let yName = yk;
+      zkeys.forEach( zk => {
+        let zName = zk;
+        const va = (data[xk] && data[xk][yk] && data[xk][yk][zk]) ? data[xk][yk][zk] : [];
+        va.forEach( cells => {
+          let r = "";
+          let tcol = "565656";
+          
+          //フラグによって、先頭の装飾変更
+          if(cells[ds.f1]){
+            r += "●";
+            tcol = "0000FF";
+          }else if(cells[ds.f2]){
+            r += "□";
+            tcol = "FF0000";
+          }else if(cells[ds.f3]){
+            r += "□";
+          }else{
+            r += "";
+          }
+          
+          r += cells[ds.mt];
+          
+          const p1Title = xName;
+          const p2Title = zName;
+          const p3Title = yName;
+          
+          const blset =  p1Title ? [{"pos": "top", "sz": 4}] : [];
+          const blset2 = p2Title ? blset.concat([{"pos": "top", "sz": 4}]) : blset;
+          const blset11 = blset2.concat([{"pos": "bottom", "sz": 4}]);
+          
+          const phaseGrid = [];
+          let gcount = 3;
+          for( phase in phaseTime){
+            const ivn = phaseTime[phase].doc_div || dfivn;
+            
+            const sta = phaseTime[phase].start;
+            const end = phaseTime[phase].end;
+            let col = phaseTime[phase].color || "FFFFFF";
+            col = col.replace("#", "");
+            
+            const iv = Math.abs(sta - end) / ivn;
+            
+            const ts = (cells[ds.ts] || cells[ds.ts]=="0") ? +cells[ds.ts] : phaseTime[ cells[ds.ph] ].start;
+            const te = (cells[ds.te] || cells[ds.te]=="0") ? +cells[ds.te] : (cells[ds.ts] || cells[ds.ts]=="0") ? +cells[ds.ts] : phaseTime[ cells[ds.ph] ].end;
+            
+            for(let i=0; i < ivn; i++){
+              //このへんはデータの定義次第
+              const tgsta = sta - iv *  i;
+              const tgend = ( i < ivn-1 ) ? sta - iv * (i + 1) : end;
+              
+              const blg = (i<1) ? [{"pos": "left", "sz": 4, "type": "dashSmallGap"}] : [];
+              const blg2 = blset11.concat(blg);
+              
+              
+              console.log(cells[0],  ts,  tgsta, tgend, te, (ts > tgend && tgsta > te) );
+              if((ts > tgend && tgsta > te) || (ts >= tgend && tgsta >= te && phase == cells[ds.ph])){ //不等号はデータの定義次第
+                phaseGrid.push({"size": grid[gcount], "fillColor": col, "borders": blg2, "shdType": "diagStripe", "shdColor": "002266" });
+              }else{
+                phaseGrid.push({"size": grid[gcount], "fillColor": col, "borders": blg2  });
+              }
+              
+              
+              gcount += 1;
+            }
+            
+          }
+          
+          const tcs = [
+            { "size": grid[0], "text": p1Title, "borders": blset },
+            { "size": grid[1], "text": p2Title, "borders": blset2 },
+            { "size": grid[2], "text": r, "borders": blset11 },
+            
+            ...phaseGrid,
+            
+            { "size": grid[grid.length-1], "text": p3Title, "borders": blset2 }
+          ];
+          
+          res += makeTR( tcs, {});
+          res += "\n";
+          
+          xName = ""; yName = ""; zName="";
+          
+        });
+        
+      });
+      
+      res += "\n\n";
+      
+      //tableCell
+    });
+    //tableRow
+  });
+  //tableOutline
+  
+
+
+//XMLの終了部分
+res += `</w:tbl>`;
+
+res += `<w:p/>`;
+res += `<w:sectPr>`;
+res += `<w:pgSz w:w="16838" w:h="23811" w:code="8"/>`;
+res += `<w:pgMar w:top="1985" w:right="1701" w:bottom="1701" w:left="1701" w:header="851" w:footer="992" w:gutter="0"/>`;
+res += `<w:cols w:space="425"/>`;
+res += `<w:docGrid w:type="lines" w:linePitch="360"/>`;
+res += `</w:sectPr>`;
+
+res += `</w:body>`;
+res += `</w:document>`;
+
+  const output = document.getElementById('textBox');
+  output.value = res;
+
+}
+
+const searchFiles = () => {
+  const word = document.getElementById("searchWord").value;
+  const words = word.split(/(\s|　)/g);
+  
+  let result = globalInfo.list;
+  
+  words.forEach( w => {
+    if( w.match(/\s/) || w == "　" ) return;
+    result = result.filter(f => f.match(w));
+    console.log(w, result.length);
+  });
+  
+  renderFromList(result);
+}
+
+const makeTC = ( para={} ) => {
+  const text = para.text || "";
+  const size = +para.size || 3141; // 適当
+  const bgcol = para.fillColor || "FFFFFF";
+  const shdType =  para.shdType || "clear"; //diagStripe
+  const shdColor = para.shdColor || "auto";
+  const borders = para.borders || [];
+  
+  let tc = "";
+  
+  tc += `<w:tc>`;
+  tc += `<w:tcPr>`;
+  tc += `<w:tcW w:w="${size}" w:type="dxa"/>`;
+  tc += `<w:shd w:val="${shdType}" w:color="${shdColor}" w:fill="${bgcol}"/>`;
+  
+  //罫線
+  if(borders && borders[0]){
+    tc += `<w:tcBorders>`;
+    borders.forEach( bp => {
+      const bpval = bp.type || "single";
+      tc += `<w:${bp.pos} w:val="${bpval}" w:sz="${bp.sz || 4}" w:space="0" w:color="auto"/>`; //罫線上
+    });
+    tc += `</w:tcBorders>`;
+  }
+  
+  tc += `</w:tcPr>`;
+  
+  tc += `<w:p>`;
+  tc += `<w:r>`;
+  tc += `<w:rPr>`;
+  tc += `<w:rFonts w:hint="eastAsia"/>`;
+  tc += `</w:rPr>`;
+  tc += `<w:t>${text}</w:t>`;
+  tc += `</w:r>`;
+  tc += `</w:p>`;
+  
+  //図形の挿入
+  //if(para.box){  tc += makeShpBox(para) };
+  
+  tc += `</w:tc>`;
+  
+  return tc;
+
+}
+
+const makeTR = ( tcs=[], para={} ) => {
+  
+  let tr = "";
+  tr += `<w:tr>`;
+  tcs.forEach( tc => {
+    tr += makeTC(tc);
+    tr += "\n";
+  });
+  tr += `</w:tr>`;
+  
+  
+  return tr;
+
+}
+
+const makeGridSet = ( columns = [1406, 1407, 3141, 1524, 1524, 1524, 1386] ) => {
+  let tg = "";
+  tg += `<w:tblGrid>`;
+  columns.forEach( c => {
+    tg += `<w:gridCol w:w="${c}"/>`;
+  });
+  tg += `</w:tblGrid>`;
+
+  return tg;
+}
+
+const copy = () => {
+  const copyText = document.querySelector("#textBox");
+  console.log(copyText);
+  copyText.select();
+  document.execCommand("copy");
+}
+
+</script>
+
+<style>
+body{
+  background-color: #FFFFFF;
+}
+
+#info div {
+  display: inline-block;
+}
+
+#memo {
+  background-color: #000000;
+  color: #FFFFFF;
+  border-radius: 4px;
+  margin: 8px;
+  padding: 4px;
+}
+
+#info {
+  margin: 8px;
+  padding: 4px;
+}
+
+#wrap {
+  margin: 8px;
+  padding: 4px;
+}
+
+.tableRow {
+  display: grid;
+  position: relative;
+  grid-template-columns: 25px 1fr 1fr 1fr 1fr;
+}
+
+.tableCell {
+  display: inline-block;
+  background-color: #FFFFFF;
+  border: solid 1px #888888;
+  padding: 4px;
+  overflow-wrap: break-word;
+}
+
+.tableCellContent div {
+  display: inline-block;
+}
+
+.floatCell {
+  position: absolute;
+}
+
+.tableTitle {
+  background-color: #EEEEFF;
+  font-weight: bold;
+  text-align: center;
+}
+
+</style>
+
+</head>
+<body>
+
+<div id="overlayLargeImageSpace"></div>
+<div id="overlayLock"></div>
+<div id="page">
+  <div id="memo">
+  タイトル
+  </div>
+  <div id="info">
+    <div id="searchInputArea"><input type="text" id="searchWord" size="50"></div>
+    <div id="infoSearchButton"><button id="searchButton" onClick="searchFiles();">絞り込み</button></div>
+    <div id="infoAddCardButton"><input type="file" id="addCard" onChange="addCard();"></div>
+    <div><textarea id="textBox" rows="30" cols="120"></textarea></div>
+    <div id="infoSearchButton"><button id="searchButton" onClick="copy();">コピー</button></div>
+  </div>
+  <div id="wrap">
+  </div>
+</div>
+
+<script>
+  
+</script>
+
+</body>
+</html>
+
+
