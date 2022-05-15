@@ -50,11 +50,11 @@ const ds = {
 
 const phaseTime = {
   "Phase-0": {"start": 200, "end": 100, "color": "#FFFFFF", "doc_width": 250, "doc_div": 1},
-  "Phase-I": {"start": 100, "end": 50, "color": "#EEEEEE"},
-  "Phase-II": {"start": 50, "end": 30, "color": "#EEEEFF"},
-  "Phase-III": {"start": 30, "end": 10, "color": "#DDDDFF"},
-  "Phase-IV": {"start": 10, "end": 0, "color": "#CCCCFF"},
-  "Phase-V": {"start": 0, "end": -10, "color": "#DDDDDD", "doc_width": 250, "doc_div": 1}
+  "Phase-I": {"start": 100, "end": 50, "color": "#F8F8F8"},
+  "Phase-II": {"start": 50, "end": 30, "color": "#EEEEEE"},
+  "Phase-III": {"start": 30, "end": 10, "color": "#E5E5E5"},
+  "Phase-IV": {"start": 10, "end": 0, "color": "#DDDDDD", "doc_width": 500, "doc_div": 2},
+  "Phase-V": {"start": 0, "end": -10, "color": "#D1D1D1", "doc_width": 250, "doc_div": 1}
 }
 
 
@@ -172,24 +172,24 @@ res += `</w:tblPr>`;
 res += "\n\n";
 
 //決め打ちでカラムの数、サイズを決定。
-const dfivn = 6;
+const dfivn = 4;
 const phaseGridSize = [];
 for( phase in phaseTime){
   if(!phaseTime[phase].sub){
     const ivn = phaseTime[phase].doc_div|| dfivn;
-    const totalRange = phaseTime[phase].doc_width || 1500;
+    const totalRange = phaseTime[phase].doc_width || 1000;
     for( let i=0; i<ivn; i++){
       phaseGridSize.push( Math.floor(totalRange / ivn) );
     }
   }
 }
-const grid = [1406, 1406, 3141, ...phaseGridSize, 1385];
+const grid = [1406, 1406, 3141 + 250*7, ...phaseGridSize, 1385];
 res += makeGridSet( grid );
 res += "\n\n";
 
   //展開
   const dat = makeTimetlineIndex(list, ds.ca, ds.ph, ds.op);
-  console.log(dat);
+  //console.log(dat);
   
   const xkeys = dat.xKeys;
   const ykeys = dat.yKeys;
@@ -251,15 +251,16 @@ res += "\n\n";
               const tgsta = sta - iv *  i;
               const tgend = ( i < ivn-1 ) ? sta - iv * (i + 1) : end;
               
-              const blg = (i<1) ? [{"pos": "left", "sz": 4, "type": "dashSmallGap"}] : [];
+              const blg = [];
+              //if(i<1) blg.push({"pos": "left", "sz": 4, "type": "dotted"}); 
               const blg2 = blset11.concat(blg);
               
               
-              console.log(cells[0],  ts,  tgsta, tgend, te, (ts > tgend && tgsta > te) );
+              //console.log(cells[0],  ts,  tgsta, tgend, te, (ts > tgend && tgsta > te) );
               if((ts > tgend && tgsta > te) || (ts >= tgend && tgsta >= te && phase == cells[ds.ph])){ //不等号はデータの定義次第
-                phaseGrid.push({"size": grid[gcount], "fillColor": col, "borders": blg2, "shdType": "diagStripe", "shdColor": "002266" });
+                phaseGrid.push({"size": grid[gcount], "fillColor": col, "borders": blg2, "shdType": "thinDiagStripe", "shdColor": "000000" });
               }else{
-                phaseGrid.push({"size": grid[gcount], "fillColor": col, "borders": blg2  });
+                phaseGrid.push({"size": grid[gcount], "fillColor": col, "borders": blg2 });
               }
               
               
@@ -275,7 +276,7 @@ res += "\n\n";
             
             ...phaseGrid,
             
-            { "size": grid[grid.length-1], "text": p3Title, "borders": blset2 }
+            { "size": grid[grid.length-1], "text": p3Title, "borders": blset11 }
           ];
           
           res += makeTR( tcs, {});
@@ -334,6 +335,7 @@ const searchFiles = () => {
 const makeTC = ( para={} ) => {
   const text = para.text || "";
   const size = +para.size || 3141; // 適当
+  const color = para.textColor || "000000";
   const bgcol = para.fillColor || "FFFFFF";
   const shdType =  para.shdType || "clear"; //diagStripe
   const shdColor = para.shdColor || "auto";
