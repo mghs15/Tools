@@ -13,14 +13,14 @@ CSV形式の経緯度リストと特定地点の距離（大圏航路）を計�
 
 [シンプル版](https://mghs15.github.io/Tools/DirSearch/simple.html)
 
-## [CheckWebGL](https://mghs15.github.io/Tools/CheckWebGL)
-WebGLの判定用ツール。不十分かも。
-
-（※[地理院地図](https://maps.gsi.go.jp/)から適当に移植）
-
-
-## [CheckNavigator](https://mghs15.github.io/Tools/CheckNavigator)
+## CheckBrower
+ブラウザの種類や機能の判定
+* [CheckBrowser](https://mghs15.github.io/Tools/checkBrowser.html)
+[Leaflet の内部機能](https://leafletjs.com/reference.html#browser)から移植。
+* [CheckNavigator](https://mghs15.github.io/Tools/CheckNavigator)
 `navigator`の内容を表示するだけのツール。
+* [CheckWebGL](https://mghs15.github.io/Tools/CheckWebGL)
+WebGLの判定用ツール。不十分かも。（※[地理院地図](https://maps.gsi.go.jp/)から適当に移植）
 
 ## [SpreadTidydata](https://mghs15.github.io/Tools/SpreadTidydata)
 Tidyなデータを２次元テーブルに展開。
